@@ -1,4 +1,4 @@
-function Remove-AzPimAssignment {
+function Add-AzPimAssignment {
     [CmdletBinding()]
     param (
         [string]$PrincipalId,
@@ -10,13 +10,13 @@ function Remove-AzPimAssignment {
     process {
         $guid = (New-Guid).Guid
 
-        $Properties = [ordered]@{RoleDefinitionId = $RoleDefinitionId; PrincipalId = $PrincipalId; RequestType = "AdminRemove" }
+        $Properties = [ordered]@{RoleDefinitionId = $RoleDefinitionId; PrincipalId = $PrincipalId; RequestType = "AdminAssign" }
         $payload = [ordered]@{Properties = $properties }
 
         
         try {
             $restParam = @{
-                Method  = "PUT"
+                Method  = "post"
                 Payload = $($payload | ConvertTo-Json)
             }
 
@@ -48,9 +48,3 @@ function Remove-AzPimAssignment {
         }
     }
 }
-
-
-# $scope = "f965cb3c-462d-4da6-a62c-69c55afe37a2"
-# $principalId = "543289fe-e550-4447-8e09-9aed347f9cca"   
-# $roleDefId = "/subscriptions/f965cb3c-462d-4da6-a62c-69c55afe37a2/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
-# Remove-AzPimAssignment -Scope $scope -PrincipalId $principalId -RoleDefinitionId $roleDefId

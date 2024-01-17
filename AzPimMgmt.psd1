@@ -69,7 +69,7 @@ Description = 'Manage Privileged Access Management using Azure Resource Manager 
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Get-AzPimAssignment','Remove-AzPimAssignment')
+FunctionsToExport = @('Get-AzPimAssignment','Remove-AzPimAssignment','Add-AzPimAssignment')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'

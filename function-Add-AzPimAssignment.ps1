@@ -8,6 +8,16 @@ function Add-AzPimAssignment {
     )
 
     process {
+
+        # Checking Azure Context
+        try {
+            $ctx = Get-AzContext
+        }
+        catch {
+            Write-Warning "Could not get Azure Context: $($error[0].Exception.Message)"
+            return $false
+        }
+
         $guid = (New-Guid).Guid
 
         $Properties = [ordered]@{RoleDefinitionId = $RoleDefinitionId; PrincipalId = $PrincipalId; RequestType = "AdminAssign" }
@@ -23,7 +33,16 @@ function Add-AzPimAssignment {
             # Check if scope is subscription
             $regex = '^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$'
             if ([regex]::IsMatch($Scope, $regex)) {
+                # if scope is subscription id
                 $restParam.Add("SubscriptionId", $Scope)
+                $restParam.Add("ApiVersion", "2020-10-01")
+                $restParam.Add("ResourceProviderName", "Microsoft.Authorization")
+                $restParam.Add("ResourceType", "roleEligibilityScheduleRequests")
+                $restParam.Add("Name", $guid)
+            }
+            elseif (!($scope)) {
+                # else if: no scope provided, using sub id
+                $restParam.Add("SubscriptionId", $ctx.Subscription.Id)
                 $restParam.Add("ApiVersion", "2020-10-01")
                 $restParam.Add("ResourceProviderName", "Microsoft.Authorization")
                 $restParam.Add("ResourceType", "roleEligibilityScheduleRequests")

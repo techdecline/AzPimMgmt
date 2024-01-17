@@ -1,13 +1,30 @@
 function Remove-AzPimAssignment {
     [CmdletBinding()]
     param (
+        [Parameter(Mandatory)]
         [string]$PrincipalId,
+        
+        [Parameter(Mandatory = $false)]
         [string]$Scope,
+        
+        [Parameter(Mandatory)]
         [string]$RoleDefinitionId,
+
+        [Parameter(Mandatory = $false)]
         [string]$ApiVersion = "2020-10-01"
     )
 
     process {
+
+        # Checking Azure Context
+        try {
+            $ctx = Get-AzContext
+        }
+        catch {
+            Write-Warning "Could not get Azure Context: $($error[0].Exception.Message)"
+            return $false
+        }
+
         $guid = (New-Guid).Guid
 
         $Properties = [ordered]@{RoleDefinitionId = $RoleDefinitionId; PrincipalId = $PrincipalId; RequestType = "AdminRemove" }
@@ -23,7 +40,16 @@ function Remove-AzPimAssignment {
             # Check if scope is subscription
             $regex = '^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$'
             if ([regex]::IsMatch($Scope, $regex)) {
+                # if scope is subscription id
                 $restParam.Add("SubscriptionId", $Scope)
+                $restParam.Add("ApiVersion", "2020-10-01")
+                $restParam.Add("ResourceProviderName", "Microsoft.Authorization")
+                $restParam.Add("ResourceType", "roleEligibilityScheduleRequests")
+                $restParam.Add("Name", $guid)
+            }
+            elseif (!($scope)) {
+                # else if: no scope provided, using sub id
+                $restParam.Add("SubscriptionId", $ctx.Subscription.Id)
                 $restParam.Add("ApiVersion", "2020-10-01")
                 $restParam.Add("ResourceProviderName", "Microsoft.Authorization")
                 $restParam.Add("ResourceType", "roleEligibilityScheduleRequests")
@@ -39,7 +65,7 @@ function Remove-AzPimAssignment {
                 return $true
             }
             else {
-                Write-Warning $restResult.Content
+                Write-Warning $restResult
                 return $false
             }
         }
@@ -48,9 +74,3 @@ function Remove-AzPimAssignment {
         }
     }
 }
-
-
-# $scope = "f965cb3c-462d-4da6-a62c-69c55afe37a2"
-# $principalId = "543289fe-e550-4447-8e09-9aed347f9cca"   
-# $roleDefId = "/subscriptions/f965cb3c-462d-4da6-a62c-69c55afe37a2/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
-# Remove-AzPimAssignment -Scope $scope -PrincipalId $principalId -RoleDefinitionId $roleDefId

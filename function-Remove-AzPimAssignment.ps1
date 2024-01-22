@@ -65,7 +65,7 @@ function Remove-AzPimAssignment {
                 return $true
             }
             else {
-                Write-Warning $restResult
+                Write-Warning $restResult.Content
                 return $false
             }
         }

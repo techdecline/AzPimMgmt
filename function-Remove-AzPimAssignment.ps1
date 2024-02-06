@@ -25,6 +25,9 @@ function Remove-AzPimAssignment {
             return $false
         }
 
+        # Sanitize Scope (Remove trailing /providers...until line ending)
+        $Scope = $Scope -replace "/providers/Microsoft.Authorization/roleEligibilitySchedules/.*"
+
         $guid = (New-Guid).Guid
 
         $Properties = [ordered]@{RoleDefinitionId = $RoleDefinitionId; PrincipalId = $PrincipalId; RequestType = "AdminRemove" }
